@@ -167,3 +167,107 @@ Imagine you drop a pebble into a calm pond:
 - **Capturing** is like the ripple approaching the center.
 - **Target** is the exact point the pebble hits the water.
 - **Bubbling** is the ripple moving back out from that point.
+
+## 🧠 Practical Examples for Each Phase
+
+### 🔹 Capturing Example: Block Access to Secure Area
+
+```html
+<div id="secure-area">
+  <button id="admin-btn">Delete All Users</button>
+</div>
+
+<script>
+  document.getElementById('secure-area').addEventListener('click', (e) => {
+    e.stopPropagation();
+    alert("Access denied! You can't click in this area.");
+  }, true); // capture phase
+</script>
+```
+
+---
+
+### 🔹 Target Example: Submit a Form
+
+```html
+<form id="login-form">
+  <input type="text" />
+  <button id="submit-btn" type="submit">Login</button>
+</form>
+
+<script>
+  document.getElementById('submit-btn').addEventListener('click', function (e) {
+    e.preventDefault();
+    console.log("Form submitted via target button!");
+  });
+</script>
+```
+
+---
+
+### 🔹 Bubbling Example: Todo List with Delegation
+
+```html
+<ul id="todo-list">
+  <li>Buy milk</li>
+  <li>Call mom</li>
+  <li>Clean house</li>
+</ul>
+
+<script>
+  document.getElementById('todo-list').addEventListener('click', function (e) {
+    if (e.target.tagName === 'LI') {
+      console.log('Todo clicked:', e.target.textContent);
+    }
+  });
+</script>
+```
+
+---
+
+## 🧰 Full DOM Propagation Demo
+
+```html
+<div id="outer" style="padding:30px; background:#ddd;">
+  Outer
+  <div id="middle" style="padding:20px; background:#bbb;">
+    Middle
+    <button id="inner" style="padding:10px;">Click me</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById('outer').addEventListener('click', function () {
+    console.log('OUTER (capturing)');
+  }, true); // Capturing
+
+  document.getElementById('middle').addEventListener('click', function () {
+    console.log('MIDDLE (bubbling)');
+  }); // Bubbling (default)
+
+  document.getElementById('inner').addEventListener('click', function () {
+    console.log('INNER (target)');
+  }); // Target
+</script>
+```
+
+---
+
+### 🧭 Output when clicking the button
+
+```bash
+OUTER (capturing)
+INNER (target)
+MIDDLE (bubbling)
+```
+
+---
+
+## 🚀 Real-World Analogy
+
+Imagine a fire alarm goes off in a big building:
+
+- **Capturing**: Security hears it and moves floor by floor to locate it.
+- **Target**: They find the exact room with the fire.
+- **Bubbling**: They warn everyone as they leave, moving back up the building.
+
