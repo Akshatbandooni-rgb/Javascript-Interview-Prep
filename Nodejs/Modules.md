@@ -50,6 +50,29 @@ This provides isolation and gives each module access to helper variables.
 
 ---
 
+### 🛠 Execution Flow of the Wrapper Function
+
+1. Your file content is wrapped into the function above.
+2. It is compiled using `vm.runInThisContext()` (like `eval` but safer).
+3. The wrapper is then invoked immediately with the actual arguments.
+
+**Example**:
+
+```js
+// hello.js
+console.log(__dirname); // injected by wrapper
+```
+
+Internally becomes:
+
+```js
+(function (exports, require, module, __filename, __dirname) {
+  console.log(__dirname);
+})({}, require, module, "/full/path/hello.js", "/full/path");
+```
+
+---
+
 ## 4. What is module caching?
 
 **Interview Answer**:  
@@ -121,7 +144,6 @@ There are mainly 3 ways:
    ```
 
 3. **Export a single function or class**:
-
    ```js
    module.exports = function () {};
    ```
@@ -156,7 +178,6 @@ Useful for configuration files or scripts that initialize something like a DB co
    ```
 
 3. **To import default export**:
-
    ```js
    const greet = require("./greet"); // when module.exports is a function
    ```
@@ -184,7 +205,6 @@ There are 4 types:
    ```
 
 2. **To clear a module from cache**:
-
    ```js
    delete require.cache[require.resolve("./someModule")];
    ```
