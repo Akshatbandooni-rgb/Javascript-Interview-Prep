@@ -77,7 +77,9 @@ http.get("http://example.com", (res) => {
 
 ---
 
-## 📦 Handling JSON Response
+## 📦 How to Send JSON Response
+
+Set the Content-Type header to `application/json`, then use `JSON.stringify()` to convert a JavaScript object into a JSON string.
 
 ```js
 res.writeHead(200, { "Content-Type": "application/json" });
@@ -396,4 +398,4 @@ res.end("!");
 | **Routing**        | `app.get()`, `app.post()`      | Manual `if` checks              |
 | **JSON Parsing**   | `express.json()` middleware    | Manually with `req.on('data')`  |
 | **Send Response**  | `res.status().json()`          | `res.writeHead()` + `res.end()` |
-| **Error Handling** | Cleaner (middleware supported) |
+| **Error Handling** | Cleaner (middleware supported) | Manual                          |
