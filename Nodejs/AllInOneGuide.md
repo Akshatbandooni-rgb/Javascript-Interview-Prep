@@ -1196,3 +1196,85 @@ emitter.removeListener("eventName", listener);
 ### 🧠 Interview Pro Tip:
 
 > “I keep my app healthy by monitoring memory with `process.memoryUsage()`, avoiding unnecessary object retention, and regularly profiling with Chrome DevTools.”
+
+---
+
+# Clustering vs. Worker Threads — What's the Difference?
+
+| **Feature**          | **Cluster**                                     | **Worker Threads**                                 |
+| -------------------- | ----------------------------------------------- | -------------------------------------------------- |
+| **Parallelism Type** | Multi-process                                   | Multi-thread                                       |
+| **Process Type**     | Each worker is a separate Node.js process       | All threads run inside the same process            |
+| **Memory**           | Each process has its own memory heap            | Threads share memory (can use `SharedArrayBuffer`) |
+| **Communication**    | Slower (uses IPC - Inter-Process Communication) | Faster (in-process messaging)                      |
+| **Use Case**         | Scale network servers (like Express.js apps)    | Handle CPU-intensive or blocking tasks             |
+| **Overhead**         | More overhead (separate processes)              | Less overhead (lightweight threads)                |
+| **Fault Tolerance**  | One thread crash doesn’t affect others          | A crash in one thread can affect the main process  |
+
+---
+
+## 🧠 When to Use Cluster
+
+### ✅ Use Cases:
+
+- Handling high traffic web requests  
+  e.g., Express, Koa, REST APIs
+- Scaling horizontally across CPU cores
+- Deploying on multi-core machines
+- When your app is mostly I/O bound (disk, network)
+
+### 🛠 Example:
+
+A web server using all 8 cores of your CPU to serve incoming users faster.
+
+```bash
+# Without cluster: Only 1 core is used
+node server.js
+
+# With cluster: Uses all 8 cores
+cluster.fork() x 8
+```
+
+---
+
+## 🧠 When to Use Worker Threads
+
+### ✅ Use Cases:
+
+- Heavy CPU tasks that would block the event loop:
+  - Data processing
+  - Image resizing
+  - Encryption/Decryption
+  - Machine learning computations
+- You want to avoid blocking main thread responsiveness.
+- You want lightweight performance (lower memory use).
+
+### 🛠 Example:
+
+Compressing a large image or computing a hash of a 5GB file.
+
+```js
+// Without worker: main thread is blocked ❌
+// With worker: task runs in background thread ✅
+```
+
+---
+
+## 🎯 TL;DR: When to Use What?
+
+| **Situation**                               | **Use Cluster or Worker Threads?** |
+| ------------------------------------------- | ---------------------------------- |
+| Web server under high traffic               | ✅ Cluster                         |
+| CPU-heavy task blocking requests            | ✅ Worker Threads                  |
+| Memory isolation needed (security)          | ✅ Cluster                         |
+| Background computation with shared memory   | ✅ Worker Threads                  |
+| Microservices or multiple apps on same port | ✅ Cluster                         |
+| Real-time analytics or parsing large files  | ✅ Worker Threads                  |
+
+---
+
+## 👨‍🏫 Interview Tip:
+
+"Clusters are great for scaling a Node.js server across CPU cores, while Worker Threads are best when I need to offload heavy CPU tasks without freezing the main event loop."
+
+Let me know if you want me to write this out as a PDF or Markdown too!
