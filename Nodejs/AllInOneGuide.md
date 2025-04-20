@@ -960,3 +960,239 @@ app.post("/upload", upload.single("file"), (req, res) => {
 | Large file uploads        | Use `multer`, `busboy`, or direct stream handling to avoid memory overload. |
 
 ---
+
+## ✅ What is **clustering** in Node.js, and how does it improve performance?
+
+### 🔹 Problem:
+
+Node.js runs in a **single thread** — meaning it can use **only one CPU core** at a time. So if you have an 8-core CPU, Node will still use just 1 core unless you do something extra.
+
+### 🔹 Solution: Clustering
+
+Clustering allows you to **run multiple instances** of your Node.js application, each on a different CPU core.
+
+These instances (called **workers**) are created using Node's built-in `cluster` module.
+
+They all share the same port, and the load is distributed between them.
+
+### 🛠 Example:
+
+```js
+const cluster = require("cluster");
+const http = require("http");
+const os = require("os");
+
+if (cluster.isMaster) {
+  const cpuCount = os.cpus().length;
+
+  for (let i = 0; i < cpuCount; i++) {
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker) => {
+    console.log(`Worker ${worker.process.pid} died`);
+    cluster.fork();
+  });
+} else {
+  http
+    .createServer((req, res) => {
+      res.end(`Handled by worker ${process.pid}`);
+    })
+    .listen(3000);
+}
+```
+
+### ✅ Benefits:
+
+- Uses all CPU cores → faster performance
+- If one worker crashes, others still handle traffic
+- Scales horizontally with zero downtime
+
+---
+
+## ✅ What are **worker threads** in Node.js?
+
+### 🔹 Problem:
+
+Node.js is single-threaded and struggles with **CPU-heavy tasks** (e.g., image resizing, file encryption, large computations) that can block the main thread.
+
+### 🔹 Solution: Worker Threads
+
+Worker threads allow you to **run code in a separate thread** (parallel) — inside the same process — without blocking the main event loop.
+
+It's part of the `worker_threads` module.
+
+### 🛠 Example:
+
+```js
+// main.js
+const { Worker } = require("worker_threads");
+
+const worker = new Worker("./heavy-task.js");
+
+worker.postMessage("start");
+
+worker.on("message", (data) => {
+  console.log("Result from worker:", data);
+});
+```
+
+```js
+// heavy-task.js
+const { parentPort } = require("worker_threads");
+
+parentPort.on("message", () => {
+  let sum = 0;
+  for (let i = 0; i < 1e9; i++) sum += i;
+  parentPort.postMessage(sum);
+});
+```
+
+### ✅ Benefits:
+
+- Perfect for CPU-bound tasks
+- Doesn’t block the main thread
+- Lightweight compared to spawning a new process
+
+---
+
+## 🔄 Difference between **clustering** and **worker threads**
+
+| Feature              | Clustering                       | Worker Threads                    |
+| -------------------- | -------------------------------- | --------------------------------- |
+| Uses CPU Cores       | Yes (multiple processes)         | Yes (multiple threads)            |
+| Memory Usage         | More (each worker = new process) | Less (shared memory)              |
+| Communication Method | Inter-process (slower)           | Message passing within process    |
+| Best for             | Scaling web servers              | CPU-heavy tasks like calculations |
+
+---
+
+## ✅ Difference between `spawn()`, `exec()`, and `fork()` in Node.js
+
+All of these are from Node's `child_process` module and are used to run **external commands or scripts**.
+
+### 🔹 `spawn()`
+
+- Starts a new process
+- Streams the output (`stdout`, `stderr`)
+- Great for **large data** or long-running commands
+
+```js
+const { spawn } = require("child_process");
+const child = spawn("ls", ["-lh", "/usr"]);
+
+child.stdout.on("data", (data) => {
+  console.log(`Output: ${data}`);
+});
+```
+
+### 🔹 `exec()`
+
+- Starts a new process
+- Buffers the entire output (not stream)
+- Better for **small, quick commands**
+
+```js
+const { exec } = require("child_process");
+exec("ls -lh", (error, stdout, stderr) => {
+  console.log(stdout);
+});
+```
+
+### 🔹 `fork()`
+
+- Special version of `spawn()` for **running another Node.js script**
+- Has built-in communication via `send()` and `on('message')`
+
+```js
+// parent.js
+const { fork } = require("child_process");
+const child = fork("child.js");
+
+child.send({ message: "Hello child!" });
+
+child.on("message", (data) => {
+  console.log("Message from child:", data);
+});
+```
+
+```js
+// child.js
+process.on("message", (data) => {
+  console.log("Message from parent:", data);
+  process.send({ message: "Hello back!" });
+});
+```
+
+---
+
+## ✅ How does Node.js handle **memory management** and **garbage collection**?
+
+Node.js uses **V8 engine** for JavaScript, and V8 handles memory automatically.
+
+### 📦 Memory is split into:
+
+- **Heap** – where objects, arrays, closures are stored
+- **Stack** – function calls and local variables
+
+### ♻️ Garbage Collection (GC)
+
+Garbage Collection = cleaning up memory that is **no longer used**.
+
+V8 runs this automatically using:
+
+- **Mark-and-sweep**
+- **Minor GC** for short-lived objects
+- **Major GC** for long-lived ones
+
+### ⚙️ You can inspect memory with:
+
+```js
+console.log(process.memoryUsage());
+```
+
+And change memory limit with:
+
+```bash
+node --max-old-space-size=4096 app.js
+```
+
+---
+
+## ✅ How to prevent **memory leaks** in Node.js?
+
+### ⚠️ Common Causes:
+
+- Global variables
+- Forgotten `setInterval` or `setTimeout`
+- Unremoved event listeners
+- Caching too much data in memory
+- Closures that retain variables unnecessarily
+
+### ✅ Best Practices to Prevent Leaks:
+
+1. **Clear intervals and timeouts**
+
+```js
+const interval = setInterval(() => {}, 1000);
+clearInterval(interval);
+```
+
+2. **Remove unused listeners**
+
+```js
+emitter.removeListener("eventName", listener);
+```
+
+3. **Use `WeakMap` or `WeakSet`** for caching (auto cleaned by GC)
+
+4. **Avoid unbounded in-memory storage**
+
+5. **Monitor with tools**:
+   - Chrome DevTools (`--inspect`)
+   - Heap snapshots
+   - `heapdump` or `memwatch-next`
+
+### 🧠 Interview Pro Tip:
+
+> “I keep my app healthy by monitoring memory with `process.memoryUsage()`, avoiding unnecessary object retention, and regularly profiling with Chrome DevTools.”
