@@ -1276,5 +1276,3 @@ Compressing a large image or computing a hash of a 5GB file.
 ## 👨‍🏫 Interview Tip:
 
 "Clusters are great for scaling a Node.js server across CPU cores, while Worker Threads are best when I need to offload heavy CPU tasks without freezing the main event loop."
-
-Let me know if you want me to write this out as a PDF or Markdown too!
