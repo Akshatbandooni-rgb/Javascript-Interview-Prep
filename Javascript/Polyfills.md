@@ -2,7 +2,7 @@
 
 ---
 
-## ✅ `Promise.all` Polyfill with Detailed Comments
+## ✅ `Promise.all` Polyfill
 
 ```javascript
 if (!Promise.all) {
@@ -53,7 +53,7 @@ if (!Promise.all) {
 
 ---
 
-## ✅ `Promise.allSettled` Polyfill (without using `Promise.all`) with Detailed Comments
+## ✅ `Promise.allSettled` Polyfill (without using `Promise.all`)
 
 ```javascript
 if (!Promise.allSettled) {
@@ -109,5 +109,3 @@ if (!Promise.allSettled) {
 ```
 
 ---
-
-Let me know if you'd like further refinements or additional sections!
