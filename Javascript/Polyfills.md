@@ -1,14 +1,17 @@
-Promise.all Polyfill with Detailed Comments
-js
-Copy
-Edit
+# Promise Polyfills
+
+---
+
+## ✅ `Promise.all` Polyfill with Detailed Comments
+
+```javascript
 if (!Promise.all) {
-Promise.all = function(promises) {
-return new Promise((resolve, reject) => {
-// Check if the input is actually an array
-if (!Array.isArray(promises)) {
-return reject(new TypeError('Promise.all accepts an array'));
-}
+  Promise.all = function (promises) {
+    return new Promise((resolve, reject) => {
+      // Check if the input is actually an array
+      if (!Array.isArray(promises)) {
+        return reject(new TypeError("Promise.all accepts an array"));
+      }
 
       // Array to store the resolved values in the original order
       const results = [];
@@ -25,7 +28,7 @@ return reject(new TypeError('Promise.all accepts an array'));
       promises.forEach((promise, index) => {
         // Convert the value to a promise (if it's not already one)
         Promise.resolve(promise)
-          .then(value => {
+          .then((value) => {
             // Store the resolved value at the corresponding index
             results[index] = value;
 
@@ -37,27 +40,29 @@ return reject(new TypeError('Promise.all accepts an array'));
               resolve(results);
             }
           })
-          .catch(error => {
+          .catch((error) => {
             // If any promise rejects, immediately reject the parent promise
             // `Promise.all` fails fast — it doesn't wait for other promises
             reject(error);
           });
       });
     });
+  };
+}
+```
 
-};
-}
-✅ Promise.allSettled Polyfill (without using Promise.all) with Detailed Comments
-js
-Copy
-Edit
+---
+
+## ✅ `Promise.allSettled` Polyfill (without using `Promise.all`) with Detailed Comments
+
+```javascript
 if (!Promise.allSettled) {
-Promise.allSettled = function(promises) {
-return new Promise((resolve, reject) => {
-// Validate that the input is an array
-if (!Array.isArray(promises)) {
-return reject(new TypeError('Promise.allSettled accepts an array'));
-}
+  Promise.allSettled = function (promises) {
+    return new Promise((resolve, reject) => {
+      // Validate that the input is an array
+      if (!Array.isArray(promises)) {
+        return reject(new TypeError("Promise.allSettled accepts an array"));
+      }
 
       // Array to hold the final result objects { status, value } or { status, reason }
       const results = [];
@@ -74,18 +79,18 @@ return reject(new TypeError('Promise.allSettled accepts an array'));
       promises.forEach((promise, index) => {
         // Normalize to a promise, so we can use `.then` and `.catch` reliably
         Promise.resolve(promise)
-          .then(value => {
+          .then((value) => {
             // If fulfilled, store the value and a status of 'fulfilled'
             results[index] = {
-              status: 'fulfilled',
-              value: value
+              status: "fulfilled",
+              value: value,
             };
           })
-          .catch(reason => {
+          .catch((reason) => {
             // If rejected, store the reason and a status of 'rejected'
             results[index] = {
-              status: 'rejected',
-              reason: reason
+              status: "rejected",
+              reason: reason,
             };
           })
           .finally(() => {
@@ -99,6 +104,10 @@ return reject(new TypeError('Promise.allSettled accepts an array'));
           });
       });
     });
-
-};
+  };
 }
+```
+
+---
+
+Let me know if you'd like further refinements or additional sections!
