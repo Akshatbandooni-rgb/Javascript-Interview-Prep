@@ -258,4 +258,400 @@ await mongoose.connection.dropDatabase();
 
 ---
 
-Let me know if you'd like further refinements or additional sections!
+<!-- New Content goes here -->
+
+# MongoDB All-In-One Guide
+
+---
+
+## CRUD Operations in MongoDB
+
+### 1. Create (Insert Documents)
+
+#### ➤ `insertOne()` – Add a single document
+
+```javascript
+db.users.insertOne({
+  name: "Akshat",
+  age: 29,
+  skills: ["Node.js", "MongoDB"],
+});
+```
+
+#### ➤ `insertMany()` – Add multiple documents
+
+```javascript
+db.users.insertMany([
+  { name: "Sunil", age: 30 },
+  { name: "Vinay", age: 27 },
+]);
+```
+
+---
+
+### 2. Read (Find Documents)
+
+#### ➤ `find()` – Get all documents
+
+```javascript
+db.users.find();
+```
+
+#### ➤ `find({ filter })` – Get documents with a condition
+
+```javascript
+db.users.find({ age: { $gt: 28 } }); // Users older than 28
+```
+
+#### ➤ `findOne()` – Get a single document
+
+```javascript
+db.users.findOne({ name: "Akshat" });
+```
+
+---
+
+### 3. Update Documents
+
+#### ➤ `updateOne()` – Update the first matching document
+
+```javascript
+db.users.updateOne({ name: "Akshat" }, { $set: { age: 30 } });
+```
+
+#### ➤ `updateMany()` – Update all matching documents
+
+```javascript
+db.users.updateMany({ age: { $lt: 30 } }, { $set: { status: "Junior" } });
+```
+
+#### ➤ `replaceOne()` – Replace the entire document
+
+```javascript
+db.users.replaceOne(
+  { name: "Sunil" },
+  { name: "Sunil", age: 31, city: "Delhi" }
+);
+```
+
+---
+
+### 4. Delete Documents
+
+#### ➤ `deleteOne()` – Delete the first matching document
+
+```javascript
+db.users.deleteOne({ name: "Vinay" });
+```
+
+#### ➤ `deleteMany()` – Delete all matching documents
+
+```javascript
+db.users.deleteMany({ age: { $lt: 28 } });
+```
+
+---
+
+### 🎤 How to Say in Interviews:
+
+"In MongoDB, we use methods like `insertOne`, `find`, `updateOne`, and `deleteOne` for CRUD operations. These methods are simple and work directly with JSON-like documents. MongoDB’s flexibility allows quick data manipulation without strict schema constraints, making it ideal for dynamic applications."
+
+---
+
+## Complex CRUD Operations with Nested Documents and Arrays
+
+### 🧾 Sample Collection: `orders`
+
+```json
+{
+  "_id": ObjectId("..."),
+  "customerName": "Akshat Bandooni",
+  "status": "processing",
+  "address": {
+    "street": "123 Dev Street",
+    "city": "Bangalore",
+    "zip": "560001"
+  },
+  "items": [
+    { "product": "Laptop", "quantity": 1, "price": 75000 },
+    { "product": "Mouse", "quantity": 2, "price": 500 }
+  ],
+  "orderedAt": ISODate("2025-04-20T10:00:00Z")
+}
+```
+
+---
+
+### 1. Create
+
+#### ➤ Method: `db.collection.insertOne(document)`
+
+```javascript
+db.orders.insertOne({
+  customerName: "Akshat Bandooni",
+  status: "processing",
+  address: {
+    street: "123 Dev Street",
+    city: "Bangalore",
+    zip: "560001",
+  },
+  items: [
+    { product: "Laptop", quantity: 1, price: 75000 },
+    { product: "Mouse", quantity: 2, price: 500 },
+  ],
+  orderedAt: new Date(),
+});
+```
+
+---
+
+### 2. Read
+
+#### ➤ Method: `db.collection.find(query, projection)`
+
+**Get all orders where `items.product = "Laptop"`**
+
+```javascript
+db.orders.find({ "items.product": "Laptop" });
+```
+
+**Get only `customerName` and `items` (hide `_id`)**
+
+```javascript
+db.orders.find({ status: "processing" }, { _id: 0, customerName: 1, items: 1 });
+```
+
+**Find orders shipped to Bangalore**
+
+```javascript
+db.orders.find({ "address.city": "Bangalore" });
+```
+
+---
+
+### 3. Update
+
+#### ➤ Method: `db.collection.updateOne(filter, update, options)`
+
+**a) Update order status**
+
+```javascript
+db.orders.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $set: { status: "shipped" } }
+);
+```
+
+**b) Update nested address field (zip)**
+
+```javascript
+db.orders.updateOne(
+  { "address.city": "Bangalore" },
+  { $set: { "address.zip": "560002" } }
+);
+```
+
+**c) Add a new item to the `items` array**
+
+```javascript
+db.orders.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $push: { items: { product: "Keyboard", quantity: 1, price: 1500 } } }
+);
+```
+
+**d) Update quantity of a specific product in the array**
+
+```javascript
+db.orders.updateOne(
+  {
+    customerName: "Akshat Bandooni",
+    "items.product": "Mouse",
+  },
+  {
+    $set: { "items.$.quantity": 3 },
+  }
+);
+```
+
+---
+
+### 4. Delete
+
+#### ➤ Method: `db.collection.deleteOne(filter)` / `db.collection.deleteMany(filter)`
+
+**a) Delete order by customer name**
+
+```javascript
+db.orders.deleteOne({ customerName: "Akshat Bandooni" });
+```
+
+**b) Remove an item from the array (e.g., "Mouse")**
+
+```javascript
+db.orders.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $pull: { items: { product: "Mouse" } } }
+);
+```
+
+---
+
+### 🎤 How to Explain in Interviews:
+
+"In a real-world scenario, MongoDB handles deeply nested structures and arrays effortlessly. For instance, in an `orders` collection with embedded documents for `address` and an array of `items`, we can use dot notation to query or update nested fields. This structure makes MongoDB ideal for modeling hierarchical data without complex joins."
+
+---
+
+## Implementing Complex Structures in Mongoose (Node.js)
+
+This section demonstrates schema definition and CRUD operations for documents containing nested documents and arrays.
+
+### 🧾 Step 1: Mongoose Schema Design
+
+```javascript
+const mongoose = require("mongoose");
+
+const itemSchema = new mongoose.Schema({
+  product: String,
+  quantity: Number,
+  price: Number,
+});
+
+const addressSchema = new mongoose.Schema({
+  street: String,
+  city: String,
+  zip: String,
+});
+
+const orderSchema = new mongoose.Schema({
+  customerName: { type: String, required: true },
+  status: { type: String, default: "processing" },
+  address: addressSchema,
+  items: [itemSchema],
+  orderedAt: { type: Date, default: Date.now },
+});
+
+const Order = mongoose.model("Order", orderSchema);
+```
+
+---
+
+### 📦 Step 2: CREATE
+
+#### ➤ Method: `Order.create(doc)` or `new Order(doc).save()`
+
+```javascript
+const newOrder = new Order({
+  customerName: "Akshat Bandooni",
+  address: {
+    street: "123 Dev Street",
+    city: "Bangalore",
+    zip: "560001",
+  },
+  items: [
+    { product: "Laptop", quantity: 1, price: 75000 },
+    { product: "Mouse", quantity: 2, price: 500 },
+  ],
+});
+
+await newOrder.save();
+```
+
+---
+
+### 🔍 Step 3: READ
+
+#### ➤ Method: `Order.find(query, projection)`
+
+**a) Get all orders with a "Laptop"**
+
+```javascript
+const orders = await Order.find({ "items.product": "Laptop" });
+```
+
+**b) Get specific fields**
+
+```javascript
+const orders = await Order.find({ status: "processing" }, "customerName items");
+```
+
+**c) Find by nested city**
+
+```javascript
+const orders = await Order.find({ "address.city": "Bangalore" });
+```
+
+---
+
+### ✏️ Step 4: UPDATE
+
+#### ➤ Method: `Order.updateOne(filter, update)`
+
+**a) Update order status**
+
+```javascript
+await Order.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $set: { status: "shipped" } }
+);
+```
+
+**b) Update zip inside address**
+
+```javascript
+await Order.updateOne(
+  { "address.city": "Bangalore" },
+  { $set: { "address.zip": "560002" } }
+);
+```
+
+**c) Push a new item**
+
+```javascript
+await Order.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $push: { items: { product: "Keyboard", quantity: 1, price: 1500 } } }
+);
+```
+
+**d) Update item quantity**
+
+```javascript
+await Order.updateOne(
+  {
+    customerName: "Akshat Bandooni",
+    "items.product": "Mouse",
+  },
+  {
+    $set: { "items.$.quantity": 3 },
+  }
+);
+```
+
+---
+
+### ❌ Step 5: DELETE
+
+#### ➤ Method: `Order.deleteOne(filter)` or `$pull` for array elements
+
+**a) Delete entire order**
+
+```javascript
+await Order.deleteOne({ customerName: "Akshat Bandooni" });
+```
+
+**b) Remove item from array**
+
+```javascript
+await Order.updateOne(
+  { customerName: "Akshat Bandooni" },
+  { $pull: { items: { product: "Mouse" } } }
+);
+```
+
+---
+
+### 🎤 How to Explain in Interviews:
+
+"In Mongoose, we define schemas for nested documents and arrays using sub-schemas. CRUD operations like `find`, `updateOne`, and `$push` allow us to manipulate deeply nested structures efficiently. This makes Mongoose ideal for handling hierarchical data in Node.js applications."
