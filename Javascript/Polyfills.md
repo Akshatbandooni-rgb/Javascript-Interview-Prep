@@ -180,4 +180,78 @@ Function.prototype.myBind = function (context, ...args) {
 
 ---
 
-Let me know if you'd like further refinements or additional sections!
+## Polyfill for `Map`
+
+```javascript
+// Adding a custom myMap method to Array's prototype
+Array.prototype.myMap = function (callback) {
+  let result = []; // Create an empty array to store transformed elements
+
+  // 'this' refers to the array on which myMap is called
+  for (let i = 0; i < this.length; i++) {
+    // Call the callback function
+    // - Pass the current element (this[i])
+    // - Pass the current index (i)
+    // - Pass the entire array (this)
+    //
+    // The callback returns the new value, which we push into result
+    result.push(callback(this[i], i, this));
+  }
+
+  // After processing all elements, return the new array
+  return result;
+};
+```
+
+---
+
+## Polyfill for `Filter`
+
+```javascript
+// Adding a custom myFilter method to Array's prototype
+Array.prototype.myFilter = function (callback) {
+  let result = []; // Create an empty array to store elements that pass the test
+
+  // 'this' refers to the array on which myFilter is called
+  for (let i = 0; i < this.length; i++) {
+    // Call the callback function
+    // - Pass the current element (this[i])
+    // - Pass the current index (i)
+    // - Pass the entire array (this)
+    //
+    // If callback returns true, it means keep the element
+    if (callback(this[i], i, this)) {
+      result.push(this[i]);
+    }
+  }
+
+  // After checking all elements, return the filtered array
+  return result;
+};
+```
+
+---
+
+### 🔥 How `myMap` Works:
+
+1. `this` refers to the array on which `myMap` is called.
+2. Iterates over each element of the array.
+3. Calls the provided `callback` function with:
+   - The current element.
+   - The current index.
+   - The entire array.
+4. Pushes the transformed value (returned by the `callback`) into a new array.
+5. Returns the new array after processing all elements.
+
+---
+
+### 🔥 How `myFilter` Works:
+
+1. `this` refers to the array on which `myFilter` is called.
+2. Iterates over each element of the array.
+3. Calls the provided `callback` function with:
+   - The current element.
+   - The current index.
+   - The entire array.
+4. If the `callback` returns `true`, the current element is added to the result array.
+5. Returns the filtered array after processing all elements.
