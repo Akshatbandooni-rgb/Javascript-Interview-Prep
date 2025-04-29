@@ -109,3 +109,75 @@ if (!Promise.allSettled) {
 ```
 
 ---
+
+## Polyfill for `call`
+
+```javascript
+Function.prototype.myCall = function (context, ...args) {
+  context = context || window; // if context is null/undefined, set to window (global object)
+
+  const fnSymbol = Symbol(); // create a unique key to avoid overwriting existing properties
+  context[fnSymbol] = this; // this -> the function we want to call
+
+  const result = context[fnSymbol](...args); // call the function with given arguments
+  delete context[fnSymbol]; // clean up by removing temporary property
+
+  return result; // return whatever the function returns
+};
+```
+
+### 🔥 How it works:
+
+1. `this` refers to the function we are trying to call (e.g., `greet`).
+2. Temporarily assign the function to the given `context` object.
+3. Call it as a method of `context`, so `this` inside the function now refers to `context`.
+4. After calling, remove the temporary property.
+
+---
+
+## Polyfill for `apply`
+
+```javascript
+Function.prototype.myApply = function (context, args) {
+  context = context || window;
+  const fnSymbol = Symbol();
+  context[fnSymbol] = this;
+
+  const result = args ? context[fnSymbol](...args) : context[fnSymbol](); // If args provided, spread them
+  delete context[fnSymbol];
+
+  return result;
+};
+```
+
+### 🔥 How it works:
+
+- Same logic as `call`, with one difference:
+  - `call` takes arguments individually (e.g., `arg1, arg2`).
+  - `apply` takes an array of arguments (e.g., `[arg1, arg2]`).
+- Spread the `args` array using `(...args)`.
+
+---
+
+## Polyfill for `bind`
+
+```javascript
+Function.prototype.myBind = function (context, ...args) {
+  const func = this; // store reference to original function
+
+  return function (...newArgs) {
+    // return a NEW function
+    return func.apply(context, [...args, ...newArgs]); // call original function with all arguments
+  };
+};
+```
+
+### 🔥 How it works:
+
+1. `bind` does not call the function immediately.
+2. It returns a new function that remembers the `this` and any arguments you provided.
+3. When the returned function is called later, it merges arguments (those from `bind` + those from call-time) and calls the original function.
+
+---
+
+Let me know if you'd like further refinements or additional sections!
