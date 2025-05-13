@@ -189,3 +189,161 @@ pm2 start server.js
 ```
 
 ---
+
+## 8. Helmet: Secure Your Node.js Applications
+
+In Node.js (especially with Express.js), **Helmet** is a middleware used to help secure your applications by setting various HTTP headers.
+
+### 🔒 What is Helmet?
+
+Helmet is a collection of middleware functions that set security-related HTTP response headers.
+
+It helps protect web apps from common vulnerabilities like:
+
+- Cross-Site Scripting (XSS)
+- Clickjacking
+- MIME-type sniffing
+- And other web vulnerabilities
+
+---
+
+### 🛡️ Why Use Helmet?
+
+- Browsers have built-in defenses against certain attacks, but they rely on correct headers.
+- Helmet sets these headers automatically so developers don't have to do it manually.
+- Helps enforce best practices in HTTP response headers.
+
+---
+
+## 🧨 1. Cross-Site Scripting (XSS)
+
+### What is XSS?
+
+XSS lets attackers inject malicious JavaScript into your website. This can:
+
+- Steal cookies
+- Hijack sessions
+- Deface your site
+
+### How Helmet Helps:
+
+Helmet sets the **Content-Security-Policy (CSP)** header.
+
+```http
+Content-Security-Policy: default-src 'self'
+```
+
+✅ This tells the browser:
+
+- "Only load scripts, styles, etc., from the same domain."
+- "Ignore any inline `<script>` tags or 3rd-party URLs unless explicitly allowed."
+
+This blocks most injected scripts from running — even if they get into your page.
+
+---
+
+## 🖼️ 2. Clickjacking
+
+### What is Clickjacking?
+
+A malicious page embeds your site in a hidden `<iframe>`, tricking users into clicking buttons they can't see.
+
+### How Helmet Helps:
+
+Helmet sets the **X-Frame-Options** header.
+
+```http
+X-Frame-Options: DENY
+```
+
+✅ This tells the browser:
+
+- "Don’t allow this site to be displayed in any iframe."
+
+This prevents your site from being embedded into another, which stops clickjacking.
+
+---
+
+## 📦 3. MIME-Type Sniffing
+
+### What is MIME Sniffing?
+
+Browsers try to guess a file's type (like treating `.txt` as JavaScript), which can be exploited.
+
+### How Helmet Helps:
+
+Helmet sets the **X-Content-Type-Options** header.
+
+```http
+X-Content-Type-Options: nosniff
+```
+
+✅ This tells the browser:
+
+- "Only treat files as their declared Content-Type."
+
+So if a file is `text/plain`, the browser won't try to treat it as JavaScript — preventing unintended execution.
+
+---
+
+## 🔐 4. Force HTTPS (Prevent Downgrade Attacks)
+
+### What are Downgrade Attacks?
+
+If someone can trick a user into using HTTP instead of HTTPS, they can intercept data (man-in-the-middle attack).
+
+### How Helmet Helps:
+
+Helmet sets the **Strict-Transport-Security (HSTS)** header.
+
+```http
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+```
+
+✅ This tells the browser:
+
+- "Always use HTTPS for this domain for the next year."
+- Even if a user types `http://example.com`, the browser upgrades it to `https://example.com`.
+
+---
+
+## Summary of Helmet Features
+
+| **Feature**                   | **Header**                        | **Purpose**                                   |
+| ----------------------------- | --------------------------------- | --------------------------------------------- |
+| **Content Security Policy**   | `Content-Security-Policy`         | Prevents XSS by restricting script sources.   |
+| **X-Frame-Options**           | `X-Frame-Options: DENY`           | Prevents clickjacking by disallowing iframes. |
+| **X-Content-Type-Options**    | `X-Content-Type-Options: nosniff` | Prevents MIME-type sniffing.                  |
+| **Strict-Transport-Security** | `Strict-Transport-Security`       | Forces HTTPS to prevent downgrade attacks.    |
+
+---
+
+## How to Use Helmet in Your Node.js Application
+
+### Installation:
+
+```bash
+npm install helmet
+```
+
+### Usage:
+
+```javascript
+const express = require("express");
+const helmet = require("helmet");
+
+const app = express();
+
+// Use Helmet middleware
+app.use(helmet());
+
+app.get("/", (req, res) => {
+  res.send("Hello, secure world!");
+});
+
+app.listen(3000, () => {
+  console.log("Server running on http://localhost:3000");
+});
+```
+
+---
